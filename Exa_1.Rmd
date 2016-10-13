@@ -1,0 +1,46 @@
+---
+title: "STA6707 Exam I"
+author: "Travis Loebs"
+date: "Wednesday, October 12, 2016"
+output: html_document
+---
+
+```{r}
+Y <- as.matrix(sapply(read.csv("C:\\Users\\Bear\\Documents\\UCF\\STA 6707\\Exam1data.csv", sep=",", header=TRUE),as.numeric))
+mahY <- mahalanobis(Y, colMeans(Y), var(Y))
+qqnorm(mahY, xlab = "Theoretical Quantiles", 
+       ylab = "Sample Quantiles", pch=16, col="saddlebrown")
+qqline(mahY, lwd=2, col="blue")
+library(mvnormtest)
+mshapiro.test( t(Y))
+
+X <- Y[-c(60),]
+mahX <- mahalanobis(X, colMeans(X), var(X))
+qqnorm(mahX, xlab = "Theoretical Quantiles", 
+       ylab = "Sample Quantiles", pch=16, col="saddlebrown")
+qqline(mahX, lwd=2, col="blue")
+library(mvnormtest)
+mshapiro.test( t(X))
+
+n <- dim(X)[1]
+one <- matrix(1., n, 1)
+m <- 1./n * t(X) %*% one
+
+Ix <- diag(rep(1, n))
+S <- 1./(n - 1) * t(X) %*% (Ix - 1./n * one %*% t(one)) %*% X
+round(cov(X)-S, 10)
+
+center_colmeans <- function(x) {
+  xcenter = colMeans(x)
+  x - rep(xcenter, rep.int(nrow(x), ncol(x)))}
+
+H <- (Ix - 1./n * one %*% t(one))
+
+Sx  <- eigen(S)
+Sisr <- Sx$vectors %*% solve(diag(sqrt(Sx$values))) %*% t(Sx$vectors)
+round(Sisr, 3)
+round(solve(Sisr %*% Sisr) - S, 4)
+
+Z <- t(Sisr %*% t(H %*% X))
+```
+
